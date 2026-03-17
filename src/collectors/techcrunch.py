@@ -1,4 +1,5 @@
 import feedparser
+from datetime import date
 
 from . import Article
 
@@ -7,7 +8,7 @@ AI_KEYWORDS = {"ai", "artificial intelligence", "machine learning", "llm", "gpt"
 MAX_ARTICLES = 3
 
 
-def collect() -> list[Article]:
+def collect(target_date: date) -> list[Article]:
     feed = feedparser.parse(FEED_URL)
     articles = []
 

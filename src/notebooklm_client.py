@@ -5,8 +5,8 @@ from notebooklm import NotebookLMClient
 from .collectors import Article
 
 
-async def run_notebooklm(articles: list[Article]) -> str:
-    today = date.today().isoformat()
+async def run_notebooklm(articles: list[Article], target_date: date) -> str:
+    today = target_date.isoformat()
 
     async with await NotebookLMClient.from_storage() as client:
         # 1. Create notebook

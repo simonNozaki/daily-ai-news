@@ -1,3 +1,4 @@
+from datetime import date
 from unittest.mock import MagicMock, patch
 
 from src.collectors.techcrunch import collect
@@ -13,13 +14,16 @@ def _mock_feed(entries: list[dict]) -> MagicMock:
     return feed
 
 
+TARGET_DATE = date(2026, 1, 1)
+
+
 @patch("src.collectors.techcrunch.feedparser.parse")
 def test_returns_ai_articles(mock_parse):
     mock_parse.return_value = _mock_feed([
         _make_entry("OpenAI releases GPT-5", "https://techcrunch.com/gpt5"),
     ])
 
-    articles = collect()
+    articles = collect(TARGET_DATE)
 
     assert len(articles) == 1
     assert articles[0].title == "OpenAI releases GPT-5"
@@ -33,7 +37,7 @@ def test_filters_non_ai_articles(mock_parse):
         _make_entry("AI startup raises $10M", "https://techcrunch.com/ai-startup"),
     ])
 
-    articles = collect()
+    articles = collect(TARGET_DATE)
 
     assert len(articles) == 1
     assert "AI" in articles[0].title
@@ -46,7 +50,7 @@ def test_keyword_match_is_case_insensitive(mock_parse):
         _make_entry("LLM benchmark results", "https://techcrunch.com/llm"),
     ])
 
-    articles = collect()
+    articles = collect(TARGET_DATE)
 
     assert len(articles) == 2
 
@@ -58,7 +62,7 @@ def test_caps_at_max_articles(mock_parse):
     ]
     mock_parse.return_value = _mock_feed(entries)
 
-    articles = collect()
+    articles = collect(TARGET_DATE)
 
     assert len(articles) == 3
 
@@ -69,4 +73,4 @@ def test_skips_entry_without_link(mock_parse):
         _make_entry("AI news", ""),
     ])
 
-    assert collect() == []
+    assert collect(TARGET_DATE) == []

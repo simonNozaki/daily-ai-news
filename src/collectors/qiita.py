@@ -1,5 +1,5 @@
 import httpx
-from datetime import datetime, timedelta, timezone
+from datetime import date
 
 from . import Article
 
@@ -7,11 +7,9 @@ QIITA_API = "https://qiita.com/api/v2/items"
 MAX_ARTICLES = 3
 
 
-def collect() -> list[Article]:
-    yesterday = (datetime.now(timezone.utc) - timedelta(days=1)).strftime("%Y-%m-%d")
-
+def collect(target_date: date) -> list[Article]:
     params = {
-        "query": f"tag:AI created:>{yesterday}",
+        "query": f"tag:AI created:>{target_date.isoformat()}",
         "per_page": 20,
     }
 

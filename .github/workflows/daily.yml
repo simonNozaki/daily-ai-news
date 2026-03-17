@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: '0 22 * * *'  # JST 07:00 (UTC 22:00)
   workflow_dispatch:
+    inputs:
+      target_date:
+        description: '対象日付 (YYYY-MM-DD)。空欄なら昨日'
+        required: false
+        default: ''
 
 jobs:
   run:
@@ -20,3 +25,4 @@ jobs:
       - run: uv run python -m src.main
         env:
           NOTEBOOKLM_AUTH_JSON: ${{ secrets.NOTEBOOKLM_AUTH_JSON }}
+          TARGET_DATE: ${{ inputs.target_date }}
