@@ -7,6 +7,9 @@ from src.collectors import Article
 from src.notebooklm_client import run_notebooklm
 
 
+TARGET_DATE = date(2026, 1, 1)
+
+
 def _make_articles(n: int = 2) -> list[Article]:
     return [Article(url=f"https://example.com/{i}", title=f"Article {i}", source="hackernews") for i in range(n)]
 
@@ -35,10 +38,9 @@ async def test_creates_notebook_with_todays_date(mock_cls):
         __aexit__=AsyncMock(return_value=False),
     ))
 
-    await run_notebooklm(_make_articles())
+    await run_notebooklm(_make_articles(), TARGET_DATE)
 
-    today = date.today().isoformat()
-    client.notebooks.create.assert_called_once_with(f"AI News {today}")
+    client.notebooks.create.assert_called_once_with(f"AI News {TARGET_DATE.isoformat()}")
 
 
 @pytest.mark.asyncio
@@ -51,7 +53,7 @@ async def test_adds_url_for_each_article(mock_cls):
     ))
     articles = _make_articles(3)
 
-    await run_notebooklm(articles)
+    await run_notebooklm(articles, TARGET_DATE)
 
     assert client.sources.add_url.call_count == 3
     called_urls = [call.args[1] for call in client.sources.add_url.call_args_list]
@@ -67,7 +69,7 @@ async def test_generates_podcast(mock_cls):
         __aexit__=AsyncMock(return_value=False),
     ))
 
-    await run_notebooklm(_make_articles())
+    await run_notebooklm(_make_articles(), TARGET_DATE)
 
     client.artifacts.generate_audio.assert_called_once_with("nb-456")
     client.artifacts.wait_for_completion.assert_called_once_with("nb-456", "task-1")
@@ -82,6 +84,6 @@ async def test_returns_notebook_id(mock_cls):
         __aexit__=AsyncMock(return_value=False),
     ))
 
-    result = await run_notebooklm(_make_articles())
+    result = await run_notebooklm(_make_articles(), TARGET_DATE)
 
     assert result == "nb-789"

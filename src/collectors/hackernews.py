@@ -1,5 +1,5 @@
 import httpx
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from . import Article
 
@@ -7,14 +7,14 @@ HN_API = "https://hn.algolia.com/api/v1/search"
 MAX_ARTICLES = 3
 
 
-def collect() -> list[Article]:
-    yesterday = datetime.now(timezone.utc) - timedelta(days=1)
-    since = int(yesterday.timestamp())
+def collect(target_date: date) -> list[Article]:
+    start = datetime(target_date.year, target_date.month, target_date.day, tzinfo=timezone.utc)
+    end = start + timedelta(days=1)
 
     params = {
         "query": "AI",
         "tags": "story",
-        "numericFilters": f"created_at_i>{since}",
+        "numericFilters": f"created_at_i>{int(start.timestamp())},created_at_i<{int(end.timestamp())}",
         "hitsPerPage": MAX_ARTICLES,
     }
 

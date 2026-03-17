@@ -1,3 +1,4 @@
+from datetime import date
 from unittest.mock import MagicMock, patch
 
 from src.collectors.zenn import collect
@@ -13,13 +14,16 @@ def _mock_feed(entries: list[dict]) -> MagicMock:
     return feed
 
 
+TARGET_DATE = date(2026, 1, 1)
+
+
 @patch("src.collectors.zenn.feedparser.parse")
 def test_returns_articles(mock_parse):
     mock_parse.return_value = _mock_feed([
         _make_entry("AIで変わる未来", "https://zenn.dev/articles/abc"),
     ])
 
-    articles = collect()
+    articles = collect(TARGET_DATE)
 
     assert len(articles) == 1
     assert articles[0].title == "AIで変わる未来"
@@ -31,7 +35,7 @@ def test_caps_at_max_articles(mock_parse):
     entries = [_make_entry(f"Article {i}", f"https://zenn.dev/{i}") for i in range(10)]
     mock_parse.return_value = _mock_feed(entries)
 
-    articles = collect()
+    articles = collect(TARGET_DATE)
 
     assert len(articles) == 3
 
@@ -42,7 +46,7 @@ def test_skips_entry_without_url(mock_parse):
         _make_entry("Title only", ""),
     ])
 
-    assert collect() == []
+    assert collect(TARGET_DATE) == []
 
 
 @patch("src.collectors.zenn.feedparser.parse")
@@ -51,11 +55,11 @@ def test_skips_entry_without_title(mock_parse):
         _make_entry("", "https://zenn.dev/articles/no-title"),
     ])
 
-    assert collect() == []
+    assert collect(TARGET_DATE) == []
 
 
 @patch("src.collectors.zenn.feedparser.parse")
 def test_empty_feed_returns_empty_list(mock_parse):
     mock_parse.return_value = _mock_feed([])
 
-    assert collect() == []
+    assert collect(TARGET_DATE) == []
