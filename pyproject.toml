@@ -1,0 +1,19 @@
+[project]
+name = "daily-ai-news"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "notebooklm-py[browser]",
+    "feedparser",
+    "httpx",
+    "python-dotenv",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+    "pytest-asyncio",
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

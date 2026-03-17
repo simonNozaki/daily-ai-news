@@ -1,0 +1,22 @@
+name: Daily AI News
+
+on:
+  schedule:
+    - cron: '0 22 * * *'  # JST 07:00 (UTC 22:00)
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: astral-sh/setup-uv@v5
+
+      - run: uv sync
+
+      - run: uv run playwright install chromium --with-deps
+
+      - run: uv run python -m src.main
+        env:
+          NOTEBOOKLM_AUTH_JSON: ${{ secrets.NOTEBOOKLM_AUTH_JSON }}

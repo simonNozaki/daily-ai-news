@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:pypi.org)",
+      "WebSearch",
+      "WebFetch(domain:deepwiki.com)",
+      "Bash(.venv/bin/python -m pytest tests/ -v 2>&1 | tail -50)",
+      "Bash(.venv/bin/python -c \"import notebooklm; help\\(notebooklm.NotebookLMClient.from_storage\\)\" 2>&1 | head -40)",
+      "Bash(.venv/bin/python -c \"import notebooklm; print\\(notebooklm.__file__\\)\")",
+      "Bash(.venv/bin/python -m notebooklm --help 2>&1 | head -30)",
+      "Bash(.venv/bin/notebooklm login:*)",
+      "Bash(.venv/bin/python -m pytest tests/ -q 2>&1)",
+      "Bash(.venv/bin/python -m src.main 2>&1)"
+    ]
+  }
+}
