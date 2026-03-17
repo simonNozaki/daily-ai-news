@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import os
 from datetime import date, timedelta
 
@@ -9,6 +10,8 @@ from .collectors import hackernews, techcrunch, zenn, qiita, theverge, mit_tech_
 from .notebooklm_client import run_notebooklm
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 
 def resolve_target_date() -> date:
@@ -27,8 +30,8 @@ def collect_all(target_date: date) -> list[Article]:
             for article in collector.collect(target_date):
                 if article.url not in seen:
                     seen[article.url] = article
-        except Exception as e:
-            print(f"[WARN] {collector.__name__} failed: {e}")
+        except Exception:
+            logger.warning("%s failed to collect articles", collector.__name__, exc_info=True)
 
     return list(seen.values())
 

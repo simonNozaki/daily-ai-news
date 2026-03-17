@@ -1,3 +1,4 @@
+import logging
 import os
 from datetime import date, timedelta
 from unittest.mock import MagicMock, patch
@@ -92,6 +93,28 @@ def test_continues_when_collector_raises(mock_hn, mock_tc, mock_zenn, mock_qiita
 
     assert len(articles) == 1
     assert articles[0].source == "techcrunch"
+
+
+@patch("src.main.itmedia_ai")
+@patch("src.main.mit_tech_review")
+@patch("src.main.theverge")
+@patch("src.main.qiita")
+@patch("src.main.zenn")
+@patch("src.main.techcrunch")
+@patch("src.main.hackernews")
+def test_collector_failure_is_logged_as_warning_with_traceback(
+    mock_hn, mock_tc, mock_zenn, mock_qiita, mock_tv, mock_mtr, mock_itm, caplog
+):
+    mock_hn.collect.side_effect = RuntimeError("timeout")
+    mock_hn.__name__ = "hackernews"
+    for m in [mock_tc, mock_zenn, mock_qiita, mock_tv, mock_mtr, mock_itm]:
+        m.collect.return_value = []
+
+    with caplog.at_level(logging.WARNING, logger="src.main"):
+        collect_all(TARGET_DATE)
+
+    assert any("hackernews" in r.message for r in caplog.records)
+    assert any(r.exc_info is not None for r in caplog.records)
 
 
 @patch("src.main.itmedia_ai")

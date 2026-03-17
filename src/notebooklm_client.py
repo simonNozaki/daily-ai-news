@@ -9,7 +9,10 @@ async def run_notebooklm(articles: list[Article], target_date: date) -> str:
     today = target_date.isoformat()
 
     async with await NotebookLMClient.from_storage() as client:
-        # 1. Create notebook
+        # 1. Set output language to Japanese
+        await client.settings.set_output_language("ja")
+
+        # 2. Create notebook
         nb = await client.notebooks.create(f"AI News {today}")
 
         # 2. Add URLs one by one
