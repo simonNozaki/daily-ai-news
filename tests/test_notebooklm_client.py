@@ -1,3 +1,4 @@
+import logging
 from datetime import date
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -102,3 +103,42 @@ async def test_sets_output_language_to_japanese(mock_cls):
     await run_notebooklm(_make_articles(), TARGET_DATE)
 
     client.settings.set_output_language.assert_called_once_with("ja")
+
+
+@pytest.mark.asyncio
+@patch("src.notebooklm_client.NotebookLMClient")
+async def test_skips_failed_url_and_continues(mock_cls):
+    client = _make_mock_client()
+    mock_cls.from_storage = AsyncMock(return_value=MagicMock(
+        __aenter__=AsyncMock(return_value=client),
+        __aexit__=AsyncMock(return_value=False),
+    ))
+    client.sources.add_url = AsyncMock(side_effect=[
+        Exception("SourceAddError: Failed to add source"),
+        None,
+        None,
+    ])
+    articles = _make_articles(3)
+
+    await run_notebooklm(articles, TARGET_DATE)
+
+    assert client.sources.add_url.call_count == 3
+    client.artifacts.generate_audio.assert_called_once()
+
+
+@pytest.mark.asyncio
+@patch("src.notebooklm_client.NotebookLMClient")
+async def test_failed_url_is_logged_as_warning(mock_cls, caplog):
+    client = _make_mock_client()
+    mock_cls.from_storage = AsyncMock(return_value=MagicMock(
+        __aenter__=AsyncMock(return_value=client),
+        __aexit__=AsyncMock(return_value=False),
+    ))
+    client.sources.add_url = AsyncMock(side_effect=Exception("SourceAddError"))
+    articles = _make_articles(1)
+
+    with caplog.at_level(logging.WARNING, logger="src.notebooklm_client"):
+        await run_notebooklm(articles, TARGET_DATE)
+
+    assert any("https://example.com/0" in r.message for r in caplog.records)
+    assert any(r.exc_info is not None for r in caplog.records)
