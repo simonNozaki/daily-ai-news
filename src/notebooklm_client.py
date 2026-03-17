@@ -1,8 +1,11 @@
+import logging
 from datetime import date
 
 from notebooklm import NotebookLMClient
 
 from .collectors import Article
+
+logger = logging.getLogger(__name__)
 
 
 async def run_notebooklm(articles: list[Article], target_date: date) -> str:
@@ -15,11 +18,14 @@ async def run_notebooklm(articles: list[Article], target_date: date) -> str:
         # 2. Create notebook
         nb = await client.notebooks.create(f"AI News {today}")
 
-        # 2. Add URLs one by one
+        # 3. Add URLs one by one, skipping failures
         for article in articles:
-            await client.sources.add_url(nb.id, article.url, wait=True)
+            try:
+                await client.sources.add_url(nb.id, article.url, wait=True)
+            except Exception:
+                logger.warning("Failed to add source: %s", article.url, exc_info=True)
 
-        # 3. Generate podcast
+        # 4. Generate podcast
         status = await client.artifacts.generate_audio(nb.id)
         await client.artifacts.wait_for_completion(nb.id, status.task_id)
 
