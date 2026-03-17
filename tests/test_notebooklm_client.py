@@ -26,6 +26,7 @@ def _make_mock_client(notebook_id: str = "nb-123") -> MagicMock:
     client.sources.add_url = AsyncMock()
     client.artifacts.generate_audio = AsyncMock(return_value=status)
     client.artifacts.wait_for_completion = AsyncMock()
+    client.settings.set_output_language = AsyncMock()
     return client
 
 
@@ -87,3 +88,17 @@ async def test_returns_notebook_id(mock_cls):
     result = await run_notebooklm(_make_articles(), TARGET_DATE)
 
     assert result == "nb-789"
+
+
+@pytest.mark.asyncio
+@patch("src.notebooklm_client.NotebookLMClient")
+async def test_sets_output_language_to_japanese(mock_cls):
+    client = _make_mock_client()
+    mock_cls.from_storage = AsyncMock(return_value=MagicMock(
+        __aenter__=AsyncMock(return_value=client),
+        __aexit__=AsyncMock(return_value=False),
+    ))
+
+    await run_notebooklm(_make_articles(), TARGET_DATE)
+
+    client.settings.set_output_language.assert_called_once_with("ja")
