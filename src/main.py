@@ -33,7 +33,10 @@ def collect_all(target_date: date) -> list[Article]:
         except Exception:
             logger.warning("%s failed to collect articles", collector.__name__, exc_info=True)
 
-    return list(seen.values())
+    articles = list(seen.values())
+    if not articles:
+        logger.warning("収集した記事が0件でした")
+    return articles
 
 
 async def main() -> None:
@@ -43,8 +46,11 @@ async def main() -> None:
     for a in articles:
         print(f"  [{a.source}] {a.title}")
 
-    notebook_id = await run_notebooklm(articles, target_date)
-    print(f"Notebook created: https://notebooklm.google.com/notebook/{notebook_id}")
+    try:
+        notebook_id = await run_notebooklm(articles, target_date)
+        print(f"Notebook created: https://notebooklm.google.com/notebook/{notebook_id}")
+    except Exception:
+        logger.error("run_notebooklm failed", exc_info=True)
 
 
 if __name__ == "__main__":
