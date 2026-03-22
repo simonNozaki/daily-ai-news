@@ -82,6 +82,14 @@ def test_empty_response_returns_empty_list(mock_client_cls):
 
 
 @patch("src.collectors.zenn.httpx.Client")
+def test_skips_entry_without_path(mock_client_cls):
+    items = [{"title": "パスなし記事", "published_at": "2026-01-01T10:00:00.000+09:00"}]
+    mock_client_cls.return_value.__enter__.return_value.get.return_value = _mock_response(items)
+
+    assert collect(TARGET_DATE) == []
+
+
+@patch("src.collectors.zenn.httpx.Client")
 def test_uses_liked_order_in_request(mock_client_cls):
     mock_get = mock_client_cls.return_value.__enter__.return_value.get
     mock_get.return_value = _mock_response([])

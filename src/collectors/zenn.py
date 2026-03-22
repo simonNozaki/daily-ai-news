@@ -25,7 +25,10 @@ def collect(target_date: date) -> list[Article]:
         published_at = item.get("published_at", "")
         if not published_at.startswith(target_dt):
             continue
-        url = f"https://zenn.dev{item.get('path', '')}"
+        path = item.get("path", "")
+        if not path:
+            continue
+        url = f"https://zenn.dev{path}"
         title = item.get("title", "")
         if title:
             articles.append(Article(url=url, title=title, source="zenn"))
