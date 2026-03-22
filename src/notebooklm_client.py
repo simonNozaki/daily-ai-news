@@ -27,6 +27,14 @@ async def run_notebooklm(articles: list[Article], target_date: date) -> str:
 
         # 4. Generate podcast
         status = await client.artifacts.generate_audio(nb.id)
-        await client.artifacts.wait_for_completion(nb.id, status.task_id)
+        try:
+            await client.artifacts.wait_for_completion(nb.id, status.task_id)
+        except TimeoutError:
+            logger.warning(
+                "Audio generation timed out for notebook %s (task_id=%s)."
+                " The notebook was created successfully but audio may still be processing.",
+                nb.id,
+                status.task_id,
+            )
 
     return nb.id

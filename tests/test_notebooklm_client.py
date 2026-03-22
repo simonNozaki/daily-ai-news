@@ -142,3 +142,37 @@ async def test_failed_url_is_logged_as_warning(mock_cls, caplog):
 
     assert any("https://example.com/0" in r.message for r in caplog.records)
     assert any(r.exc_info is not None for r in caplog.records)
+
+
+@pytest.mark.asyncio
+@patch("src.notebooklm_client.NotebookLMClient")
+async def test_audio_timeout_is_logged_as_warning_and_does_not_raise(mock_cls, caplog):
+    client = _make_mock_client("nb-timeout")
+    mock_cls.from_storage = AsyncMock(return_value=MagicMock(
+        __aenter__=AsyncMock(return_value=client),
+        __aexit__=AsyncMock(return_value=False),
+    ))
+    client.artifacts.wait_for_completion = AsyncMock(side_effect=TimeoutError("timed out after 300s"))
+
+    with caplog.at_level(logging.WARNING, logger="src.notebooklm_client"):
+        result = await run_notebooklm(_make_articles(), TARGET_DATE)
+
+    assert result == "nb-timeout"
+    assert any("nb-timeout" in r.message for r in caplog.records)
+    assert any(r.levelno == logging.WARNING for r in caplog.records)
+
+
+@pytest.mark.asyncio
+@patch("src.notebooklm_client.NotebookLMClient")
+async def test_audio_timeout_log_includes_task_id(mock_cls, caplog):
+    client = _make_mock_client("nb-timeout")
+    mock_cls.from_storage = AsyncMock(return_value=MagicMock(
+        __aenter__=AsyncMock(return_value=client),
+        __aexit__=AsyncMock(return_value=False),
+    ))
+    client.artifacts.wait_for_completion = AsyncMock(side_effect=TimeoutError("timed out after 300s"))
+
+    with caplog.at_level(logging.WARNING, logger="src.notebooklm_client"):
+        await run_notebooklm(_make_articles(), TARGET_DATE)
+
+    assert any("task-1" in r.message for r in caplog.records)
