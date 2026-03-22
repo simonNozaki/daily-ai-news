@@ -1,0 +1,22 @@
+import feedparser
+from datetime import date
+
+from . import Article
+
+FEED_URL = "https://venturebeat.com/ai/feed/"
+MAX_ARTICLES = 5
+
+
+def collect(target_date: date) -> list[Article]:
+    feed = feedparser.parse(FEED_URL)
+    articles = []
+
+    for entry in feed.entries:
+        title = entry.get("title", "")
+        url = entry.get("link", "")
+        if url and title:
+            articles.append(Article(url=url, title=title, source="venturebeat"))
+        if len(articles) >= MAX_ARTICLES:
+            break
+
+    return articles

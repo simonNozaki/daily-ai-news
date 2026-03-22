@@ -6,7 +6,7 @@ from datetime import date, timedelta
 from dotenv import load_dotenv
 
 from .collectors import Article
-from .collectors import hackernews, techcrunch, zenn, qiita, theverge, mit_tech_review, itmedia_ai
+from .collectors import hackernews, techcrunch, zenn, qiita, venturebeat, a16z
 from .notebooklm_client import run_notebooklm
 
 load_dotenv()
@@ -22,7 +22,7 @@ def resolve_target_date() -> date:
 
 
 def collect_all(target_date: date) -> list[Article]:
-    collectors = [hackernews, techcrunch, zenn, qiita, theverge, mit_tech_review, itmedia_ai]
+    collectors = [hackernews, techcrunch, zenn, qiita, venturebeat, a16z]
     seen: dict[str, Article] = {}
 
     for collector in collectors:

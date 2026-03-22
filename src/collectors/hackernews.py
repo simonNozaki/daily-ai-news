@@ -4,7 +4,7 @@ from datetime import date, datetime, timedelta, timezone
 from . import Article
 
 HN_API = "https://hn.algolia.com/api/v1/search"
-MAX_ARTICLES = 3
+MAX_ARTICLES = 5
 
 
 def collect(target_date: date) -> list[Article]:

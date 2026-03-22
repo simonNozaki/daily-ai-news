@@ -4,7 +4,7 @@ from datetime import date
 from . import Article
 
 QIITA_API = "https://qiita.com/api/v2/items"
-MAX_ARTICLES = 3
+MAX_ARTICLES = 5
 
 
 def collect(target_date: date) -> list[Article]:

@@ -63,6 +63,17 @@ def test_respects_max_articles(mock_client_cls):
 
 
 @patch("src.collectors.hackernews.httpx.Client")
+def test_sends_max_articles_as_hits_per_page(mock_client_cls):
+    mock_get = mock_client_cls.return_value.__enter__.return_value.get
+    mock_get.return_value = _mock_response([])
+
+    collect(TARGET_DATE)
+
+    params = mock_get.call_args.kwargs["params"]
+    assert params["hitsPerPage"] == 5
+
+
+@patch("src.collectors.hackernews.httpx.Client")
 def test_uses_target_date_for_api_filter(mock_client_cls):
     mock_get = mock_client_cls.return_value.__enter__.return_value.get
     mock_get.return_value = _mock_response([])

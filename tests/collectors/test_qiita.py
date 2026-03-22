@@ -52,7 +52,7 @@ def test_caps_at_max_articles(mock_client_cls):
 
     articles = collect(TARGET_DATE)
 
-    assert len(articles) == 3
+    assert len(articles) == 5
 
 
 @patch("src.collectors.qiita.httpx.Client")
