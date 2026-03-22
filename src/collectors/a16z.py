@@ -9,6 +9,9 @@ MAX_ARTICLES = 5
 
 
 def collect(target_date: date) -> list[Article]:
+    # target_date is not used for filtering: a16z posts infrequently, so date
+    # filtering would return empty results most days. We take the latest
+    # MAX_ARTICLES AI-related entries instead.
     feed = feedparser.parse(FEED_URL)
     articles = []
 

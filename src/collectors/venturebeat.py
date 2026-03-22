@@ -8,6 +8,8 @@ MAX_ARTICLES = 5
 
 
 def collect(target_date: date) -> list[Article]:
+    # target_date is not used for filtering: the VentureBeat AI feed is already
+    # scoped to the AI category, so we simply take the latest MAX_ARTICLES entries.
     feed = feedparser.parse(FEED_URL)
     articles = []
 

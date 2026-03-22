@@ -56,7 +56,7 @@ def test_respects_max_articles(mock_client_cls):
     hits = [{"objectID": str(i), "title": f"AI Story {i}", "url": f"https://example.com/{i}"} for i in range(5)]
     mock_client_cls.return_value.__enter__.return_value.get.return_value = _mock_response(hits)
 
-    # MAX_ARTICLES=3 is enforced via hitsPerPage in the API request;
+    # MAX_ARTICLES=5 is enforced via hitsPerPage in the API request;
     # the collector returns whatever the API sends back.
     articles = collect(TARGET_DATE)
     assert len(articles) == 5  # collector trusts API to cap at hitsPerPage
