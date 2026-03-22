@@ -5,7 +5,7 @@ from . import Article
 
 FEED_URL = "https://techcrunch.com/feed/"
 AI_KEYWORDS = {"ai", "artificial intelligence", "machine learning", "llm", "gpt", "openai", "deepmind", "gemini"}
-MAX_ARTICLES = 3
+MAX_ARTICLES = 5
 
 
 def collect(target_date: date) -> list[Article]:

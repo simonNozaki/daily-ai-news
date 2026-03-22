@@ -4,7 +4,7 @@ from datetime import date
 from . import Article
 
 API_URL = "https://zenn.dev/api/articles"
-MAX_ARTICLES = 3
+MAX_ARTICLES = 5
 
 
 def collect(target_date: date) -> list[Article]:

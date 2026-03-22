@@ -1,0 +1,67 @@
+from datetime import date
+from unittest.mock import MagicMock, patch
+
+from src.collectors.venturebeat import collect
+
+
+def _make_entry(title: str, link: str) -> dict:
+    return {"title": title, "link": link}
+
+
+def _mock_feed(entries: list[dict]) -> MagicMock:
+    feed = MagicMock()
+    feed.entries = entries
+    return feed
+
+
+TARGET_DATE = date(2026, 1, 1)
+
+
+@patch("src.collectors.venturebeat.feedparser.parse")
+def test_returns_articles(mock_parse):
+    mock_parse.return_value = _mock_feed([
+        _make_entry("OpenAI launches new model", "https://venturebeat.com/ai/openai"),
+    ])
+
+    articles = collect(TARGET_DATE)
+
+    assert len(articles) == 1
+    assert articles[0].title == "OpenAI launches new model"
+    assert articles[0].source == "venturebeat"
+
+
+@patch("src.collectors.venturebeat.feedparser.parse")
+def test_caps_at_max_articles(mock_parse):
+    entries = [
+        _make_entry(f"AI story {i}", f"https://venturebeat.com/ai/{i}") for i in range(10)
+    ]
+    mock_parse.return_value = _mock_feed(entries)
+
+    articles = collect(TARGET_DATE)
+
+    assert len(articles) == 5
+
+
+@patch("src.collectors.venturebeat.feedparser.parse")
+def test_skips_entry_without_link(mock_parse):
+    mock_parse.return_value = _mock_feed([
+        _make_entry("AI news", ""),
+    ])
+
+    assert collect(TARGET_DATE) == []
+
+
+@patch("src.collectors.venturebeat.feedparser.parse")
+def test_skips_entry_without_title(mock_parse):
+    mock_parse.return_value = _mock_feed([
+        _make_entry("", "https://venturebeat.com/ai/story"),
+    ])
+
+    assert collect(TARGET_DATE) == []
+
+
+@patch("src.collectors.venturebeat.feedparser.parse")
+def test_empty_feed_returns_empty_list(mock_parse):
+    mock_parse.return_value = _mock_feed([])
+
+    assert collect(TARGET_DATE) == []
